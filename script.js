@@ -28,10 +28,10 @@ const generateResponse = (incomingChatLi) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             prompt: userMessage,
-            temperature: 0.9,
-            maxOutputTokens: 1000,
-            topP: 1,
-            topK: 1
+            temperature: 0.7,
+            maxOutputTokens: 100,
+            topP: 1.0,
+            topK: 50
         }),
     };
 
@@ -39,14 +39,14 @@ const generateResponse = (incomingChatLi) => {
         .then(response => {
             console.log("Response Status:", response.status);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
             console.log("API Response:", data);
 
-            if (data && data.text) { // Adjust based on actual response structure
+            if (data && data.text) {
                 messageElement.textContent = data.text;
             } else {
                 messageElement.textContent = "Sorry, I couldn't process your message.";
