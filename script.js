@@ -5,12 +5,15 @@ const chatbotToggler = document.querySelector(".chatbot-toggler");
 const chatbotCloseBtn = document.querySelector(".close-btn");
 
 let userMessage;
-const API_KEY = "AIzaSyCUiT43vkoltfLMpBYU_NHmH8ObKyQv-Ps";
+const API_KEY = "AIzaSyCTucn5YuHFa3lvdb3Ct5VJwHjn3J1RFLI";
+const API_URL = `https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5:generateText?key=${API_KEY}`;
 
 const createChatLi = (message, className) => {
     const chatLi = document.createElement("li");
     chatLi.classList.add("chat", className);
-    let chatContent = className === "outgoing" ? `<p></p>` : `<span class="material-symbols-outlined">smart_toy</span><p></p>`;
+    let chatContent = className === "outgoing" 
+        ? `<p></p>` 
+        : `<span class="material-symbols-outlined">smart_toy</span><p></p>`;
     chatLi.innerHTML = chatContent;
     chatLi.querySelector("p").textContent = message;
 
@@ -18,30 +21,35 @@ const createChatLi = (message, className) => {
 };
 
 const generateResponse = (incomingChatLi) => {
-    const API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?';
     const messageElement = incomingChatLi.querySelector("p");
 
     const requestOptions = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            prompt: {
-                text: userMessage
-            }
+            prompt: userMessage,
+            temperature: 0.9,
+            maxOutputTokens: 1000,
+            topP: 1,
+            topK: 1
         }),
     };
 
     fetch(API_URL, requestOptions)
-        .then(res => res.json())
+        .then(response => {
+            console.log("Response Status:", response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            // Log the entire response to see its structure
-            console.log(data);
+            console.log("API Response:", data);
 
-            // Adjust this line based on the actual structure of the response
-            if (data.candidates && data.candidates.length > 0) {
-                messageElement.textContent = data.candidates[0].output;
+            if (data && data.text) { // Adjust based on actual response structure
+                messageElement.textContent = data.text;
             } else {
-                messageElement.textContent = "Isse kya chat kar raha h, bhabhiji nazar h kya?..";
+                messageElement.textContent = "Sorry, I couldn't process your message.";
             }
         })
         .catch((error) => {
@@ -53,7 +61,6 @@ const generateResponse = (incomingChatLi) => {
 
 const handleChat = () => {
     userMessage = ChatInput.value.trim();
-    console.log(userMessage);
     if (!userMessage) return;
     ChatInput.value = "";
     chatbox.appendChild(createChatLi(userMessage, "outgoing"));
