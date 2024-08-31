@@ -6,14 +6,12 @@ const chatbotCloseBtn = document.querySelector(".close-btn");
 
 let userMessage;
 const API_KEY = "AIzaSyCTucn5YuHFa3lvdb3Ct5VJwHjn3J1RFLI";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5:generateText?key=${API_KEY}`;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 
 const createChatLi = (message, className) => {
     const chatLi = document.createElement("li");
     chatLi.classList.add("chat", className);
-    let chatContent = className === "outgoing" 
-        ? `<p></p>` 
-        : `<span class="material-symbols-outlined">smart_toy</span><p></p>`;
+    let chatContent = className === "outgoing" ? `<p></p>` : `<span class="material-symbols-outlined">smart_toy</span><p></p>`;
     chatLi.innerHTML = chatContent;
     chatLi.querySelector("p").textContent = message;
 
@@ -27,27 +25,25 @@ const generateResponse = (incomingChatLi) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            prompt: userMessage,
-            temperature: 0.7,
-            maxOutputTokens: 100,
-            topP: 1.0,
-            topK: 50
+            contents: [{
+                parts: [{ text: userMessage }]
+            }]
         }),
     };
 
     fetch(API_URL, requestOptions)
         .then(response => {
-            console.log("Response Status:", response.status);
+            console.log("Response Status:", response.status); // Log response status
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("API Response:", data);
+            console.log("API Response:", data); // Log the response body
 
-            if (data && data.text) {
-                messageElement.textContent = data.text;
+            if (data.contents && data.contents.length > 0 && data.contents[0].parts.length > 0) {
+                messageElement.textContent = data.contents[0].parts[0].text;
             } else {
                 messageElement.textContent = "Sorry, I couldn't process your message.";
             }
