@@ -41,7 +41,7 @@ const generateResponse = (incomingChatLi) => {
             if (data.candidates && data.candidates.length > 0) {
                 messageElement.textContent = data.candidates[0].output;
             } else {
-                messageElement.textContent = "Isse kya chattiya raha h, bhabhiji nazar h kya";
+                messageElement.textContent = "Isse kya chat kar raha h, bhabhiji nazar h kya?..";
             }
         })
         .catch((error) => {
